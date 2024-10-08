@@ -1,0 +1,43 @@
+import numpy as np
+
+def vogel_approximation(supply, demand):
+    distribution = np.zeros((len(supply), len(demand)))
+    
+    while np.any(supply) and np.any(demand):
+        penalty_supply = np.full(len(supply), np.inf)
+        penalty_demand = np.full(len(demand), np.inf)
+
+        for i in range(len(supply)):
+            if supply[i] > 0:
+                sorted_demand = sorted([(demand[j], j) for j in range(len(demand)) if demand[j] > 0])
+                if len(sorted_demand) > 1:
+                    penalty_supply[i] = sorted_demand[1][0] - sorted_demand[0][0]
+
+        for j in range(len(demand)):
+            if demand[j] > 0:
+                sorted_supply = sorted([(supply[i], i) for i in range(len(supply)) if supply[i] > 0])
+                if len(sorted_supply) > 1:
+                    penalty_demand[j] = sorted_supply[1][0] - sorted_supply[0][0]
+
+        if np.max(penalty_supply) >= np.max(penalty_demand):
+            i = np.argmax(penalty_supply)
+            j = np.argmin(demand)  
+        else:
+            j = np.argmax(penalty_demand)
+            i = np.argmin(supply)  
+
+        allocated = min(supply[i], demand[j])
+        distribution[i][j] = allocated
+        supply[i] -= allocated
+        demand[j] -= allocated
+
+    return distribution
+
+supply = [1000, 1500, 700]  # Омск, Томск, Пермь
+demand = [1200, 1000, 1000]  # ЕКБ, СПБ, МСК
+
+result = vogel_approximation(supply, demand)
+
+print("Распределение товаров:")
+for row in result:
+    print(row)
